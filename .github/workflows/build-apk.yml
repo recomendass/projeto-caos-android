@@ -24,7 +24,7 @@ jobs:
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Extract project
-        run: unzip -q ProjetoCaosAndroid_Fonte.zip
+        run: unzip -q ProjetoCaosAndroid_Fonte-1.zip
 
       - name: Build APK
         working-directory: ProjetoCaosAndroid
