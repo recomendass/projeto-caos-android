@@ -10,6 +10,7 @@ jobs:
 
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
     steps:
       - name: Checkout
@@ -26,28 +27,27 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - 
-        run: yes | sdkmanager --licenses || true
-
-      - 
-        run: |
       - name: Install Android SDK
         shell: bash
         run: |
-          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit 2>/dev/null)
 
           if [ -z "$SDKMANAGER" ]; then
-            echo "sdkmanager não encontrado"
+            echo "ERRO: sdkmanager não encontrado."
+            echo "Conteúdo do Android SDK:"
+            ls -la "$ANDROID_HOME"
             exit 1
           fi
 
+          echo "sdkmanager encontrado em: $SDKMANAGER"
+
           echo "$(dirname "$SDKMANAGER")" >> "$GITHUB_PATH"
 
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses || true
 
-          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
-
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
 
       - name: Extract project
         run: unzip -q ProjetoCaosAndroid_Fonte-1.zip
