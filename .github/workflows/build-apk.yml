@@ -30,16 +30,12 @@ jobs:
       - name: Install Android SDK
         shell: bash
         run: |
-          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit 2>/dev/null)
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)
 
           if [ -z "$SDKMANAGER" ]; then
-            echo "ERRO: sdkmanager não encontrado."
-            echo "Conteúdo do Android SDK:"
-            ls -la "$ANDROID_HOME"
+            echo "ERRO: sdkmanager não encontrado"
             exit 1
           fi
-
-          echo "sdkmanager encontrado em: $SDKMANAGER"
 
           echo "$(dirname "$SDKMANAGER")" >> "$GITHUB_PATH"
 
@@ -51,6 +47,20 @@ jobs:
 
       - name: Extract project
         run: unzip -q ProjetoCaosAndroid_Fonte-1.zip
+
+      - name: Repair Gradle properties
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          file = Path("ProjetoCaosAndroid/gradle.properties")
+          content = file.read_bytes()
+          content = content.replace(b"\\n", b"\n")
+          file.write_bytes(content)
+
+          print("gradle.properties corrigido:")
+          print(file.read_text())
+          PY
 
       - name: Build APK
         working-directory: ProjetoCaosAndroid
